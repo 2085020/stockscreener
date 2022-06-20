@@ -24,7 +24,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>Stock Screeer</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -39,5 +39,28 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <div style="margin: auto; text-align:center; width:150px; margin-top: 10px;">
+    <div id="paypal-button-container-P-2V207081S06899910MKN46VI"></div>
+    </div>
+    <script src="https://www.paypal.com/sdk/js?client-id=AVUVhDum_6eMMGCARYogj4GmSY5bO8aWNVxo4XEkq_Kfy9LpKISJtoHsDF1_NeXLPyUY8-nuXpNoru5W&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+<script>
+  paypal.Buttons({
+      style: {
+          shape: 'rect',
+          color: 'gold',
+          layout: 'vertical',
+          label: 'subscribe'
+      },
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({
+          /* Creates the subscription */
+          plan_id: 'P-2V207081S06899910MKN46VI'
+        });
+      },
+      onApprove: function(data, actions) {
+        alert(data.subscriptionID); // You can add optional success message for the subscriber here
+      }
+  }).render('#paypal-button-container-P-2V207081S06899910MKN46VI'); // Renders the PayPal button
+</script>
   </body>
 </html>
