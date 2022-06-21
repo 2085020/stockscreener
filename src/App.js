@@ -58,13 +58,21 @@ class App extends React.Component {
         "https://www.forexsignals10pips.com/stockscreener/api.php?key=" + this.state.myKey + "&screen=" + id + "&format=JSON")
         .then((res) => res.json())
         .then((json) => {
-          this.setState({
-            ...this.state,
-            items: this.state.items,
-            DataisLoaded: this.state.DataisLoaded,
-            stocks: json,
-            text: innerText
-          });
+          if (json.response === '300') {
+            this.notifyError("User not logged in")();
+            this.setState({
+              ...this.state,
+              myKey: null
+            });
+          } else {
+            this.setState({
+              ...this.state,
+              items: this.state.items,
+              DataisLoaded: this.state.DataisLoaded,
+              stocks: json,
+              text: innerText
+            });
+          }
         })
     }
 
@@ -166,7 +174,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <div style={divStyle}>
-          <LoginDialog handleDisconnect={this.handleDisconnect()} myKey={myKey?myKey.substring(0,4)+"...":""} onClose={this.handleClose} notifyOk={this.notifyOk('Registered')} notifyError={this.notifyError('User already exists')}></LoginDialog>
+          <LoginDialog handleDisconnect={this.handleDisconnect()} myKey={myKey ? myKey.substring(0, 4) + "..." : ""} onClose={this.handleClose} notifyOk={this.notifyOk('Registered')} notifyError={this.notifyError('User already exists')}></LoginDialog>
 
 
         </div>
@@ -218,7 +226,12 @@ class App extends React.Component {
                     </p>
                     <h3>Is this service free?</h3>
                     <p>
-                      Now this service is free, but you can donate to our team in order to improve this page and the screeners. At the bottom of the page you can donate by credit card or paypal
+                      Now this service is free to get the first two options, but you can suscribe to our service by 1$ to get all the options available and all the screeners. At the bottom of the page you can subscribe by credit card or paypal.
+                    </p>
+                    <h3>Why I have to pay for this service?</h3>
+                    <p>
+                      We will use your payments to improve this page and the screeners. If you think that our service can save you a lot of time identifying the best performance stocks and sectors.
+                      At the bottom of the page you can subscribe by credit card or paypal.
                     </p>
                     <h3>Can I have my own screener?</h3>
                     <p>
