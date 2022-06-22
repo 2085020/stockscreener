@@ -12,6 +12,7 @@ import Link from '@mui/material/Link';
 import { textAlign } from "@mui/system";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AdvancedChart } from "react-tradingview-embed";
 
 class App extends React.Component {
   // Constructor 
@@ -25,7 +26,8 @@ class App extends React.Component {
       text: "",
       myKey: "",
       filterSector: "",
-      filterIndustry: ""
+      filterIndustry: "",
+      symbol: ""
     };
   }
 
@@ -62,7 +64,8 @@ class App extends React.Component {
             this.notifyError("User not logged in")();
             this.setState({
               ...this.state,
-              myKey: null
+              myKey: null,
+              symbol: ""
             });
           } else {
             this.setState({
@@ -70,7 +73,8 @@ class App extends React.Component {
               items: this.state.items,
               DataisLoaded: this.state.DataisLoaded,
               stocks: json,
-              text: innerText
+              text: innerText,
+              symbol: ""
             });
           }
         })
@@ -93,14 +97,16 @@ class App extends React.Component {
   onClickFilterSector = (sector) => () => {
     this.setState({
       ...this.state,
-      filterSector: sector
+      filterSector: sector,
+      symbol: ""
     })
   }
 
   onClickFilterIndustry = (industry) => () => {
     this.setState({
       ...this.state,
-      filterIndustry: industry
+      filterIndustry: industry,
+      symbol: "",
     })
   }
 
@@ -120,6 +126,13 @@ class App extends React.Component {
       })
     }
 
+  }
+
+  setSimbol = (ticker) => () => {
+    this.setState({
+      ...this.state,
+      symbol: ticker
+    })
   }
 
   render() {
@@ -243,20 +256,28 @@ class App extends React.Component {
                       In order to limit the usage of our servers we need everyone who uses our service to be registered and logged in. We only require an e-mail and a password. No mail will be sent to you
                       and no other usages will have your mail. Just to identify you in our page. You can sing up and sing in using the person logo at the top right.
                     </p>
+                  
                   </div>
-
                 }
                 {text &&
                   <div>
                     <h1> {text} </h1>
-                    {showchart && <MDBContainer>
+                    {showchart && this.state.symbol=="" && <MDBContainer>
                       <Pie data={data}
                         style={{ maxHeight: '300px' }}
                       />
                     </MDBContainer>
                     }
                     <center>
+                    { this.state.symbol && 
+                      <div>
+                        <AdvancedChart widgetPropsAny ={{"range":"12M", "theme": "dark", "symbol": this.state.symbol, "width":"100%", "height" : "400px", "allow_symbol_change": false}} />
+                        <br/>
+                        </div>
+                        }
                       {showchart &&
+                      <div>
+
                         <table>
                           <thead>
                             <tr className="background-grey">
@@ -276,7 +297,7 @@ class App extends React.Component {
                             {stocks.map((stock) => {
                               return ((this.state.filterSector == "" || stock.Sector == this.state.filterSector) && (this.state.filterIndustry == "" || stock.Industry == this.state.filterIndustry) ?
                                 <tr>
-                                  <td>{stock.Symbol}</td>
+                                  <td><Link href="#" variant="body2" onClick={this.setSimbol(stock.Symbol)}>{stock.Symbol}</Link></td>
                                   <td>{stock.Name}{this.state.filterSector}</td>
                                   <td><Link href="#" variant="body2" onClick={this.onClickFilterSector(stock.Sector)}>{stock.Sector}</Link></td>
                                   <td><Link href="#" variant="body2" onClick={this.onClickFilterIndustry(stock.Industry)}>{stock.Industry}</Link></td>
@@ -290,6 +311,7 @@ class App extends React.Component {
                             }
                           </tbody>
                         </table>
+                        </div>
                       }
                       {!showchart && <div>No tickers found today in this screener</div>}
                     </center>
