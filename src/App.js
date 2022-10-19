@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 import LoginDialog from './Components/LoginDialog';
+import TradingViewDialog from './Components/TradingViewDialog';
 import { Pie } from "react-chartjs-2";
 import { MDBContainer } from "mdbreact";
 import { chartColors } from "./colors";
@@ -18,6 +19,7 @@ class App extends React.Component {
   // Constructor 
   constructor(props) {
     super(props);
+    this.myRef = React.createRef();
 
     this.state = {
       items: [],
@@ -110,6 +112,37 @@ class App extends React.Component {
     })
   }
 
+  onClickOrderChange = () => () => {
+    this.setState({
+      ...this.state,
+      stocks: this.state.stocks.sort((a,b) => { return a.Change-b.Change; }),
+    })
+  }
+
+
+  onClickOrderVolume = () => () => {
+    this.setState({
+      ...this.state,
+      stocks: this.state.stocks.sort((a,b) => { return a.Volume-b.Volume; }),
+    })
+  }
+
+  onClickOrderTicker = () => () => {
+    this.setState({
+      ...this.state,
+      stocks: this.state.stocks.sort((a,b) => { 
+          const nameA = a.Symbol; // ignore upper and lowercase
+          const nameB = b.Symbol; // ignore upper and lowercase
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+      }),
+    })
+  }
+
   clickUser = () => {
     this.setState({
       ...this.state,
@@ -134,6 +167,30 @@ class App extends React.Component {
       symbol: ticker
     })
   }
+
+  TradingViewDialogClose = () => {
+    this.setState({
+      ...this.state,
+      symbol: ""
+    })
+  }
+
+  onMove = () => {
+    this.setState({
+      ...this.state,
+      symbol: document.getElementById("R"+this.state.symbol).nextElementSibling.id.substring(1)
+    })
+    
+  }
+
+  onMoveBack = () => {
+    this.setState({
+      ...this.state,
+      symbol: document.getElementById("R"+this.state.symbol).previousElementSibling.id.substring(1)
+    })
+    
+  }
+
 
   render() {
     const { DataisLoaded, items, stocks, text, myKey } = this.state;
@@ -256,62 +313,78 @@ class App extends React.Component {
                       In order to limit the usage of our servers we need everyone who uses our service to be registered and logged in. We only require an e-mail and a password. No mail will be sent to you
                       and no other usages will have your mail. Just to identify you in our page. You can sing up and sing in using the person logo at the top right.
                     </p>
-                  
+
                   </div>
                 }
                 {text &&
                   <div>
                     <h1> {text} </h1>
-                    {showchart && this.state.symbol=="" && <MDBContainer>
+                    {showchart && <MDBContainer>
                       <Pie data={data}
                         style={{ maxHeight: '300px' }}
                       />
                     </MDBContainer>
                     }
                     <center>
-                    { this.state.symbol && 
-                      <div>
-                        <AdvancedChart widgetPropsAny ={{"range":"12M", "theme": "dark", "symbol": this.state.symbol, "width":"100%", "height" : "400px", "allow_symbol_change": false}} />
-                        <br/>
+                      {/*this.state.symbol &&
+                        <div>
+                          <AdvancedChart widgetPropsAny={{
+                            "range": "12M", "theme": "dark", "symbol": this.state.symbol, "width": "100%", "height": "400px", "allow_symbol_change": false, "studies": [
+                              {
+                                "id": "MAExp@tv-basicstudies",
+                                "version": 60,
+                                "inputs": {
+                                  "length": 20,
+                                }},
+                                {
+                                  "id": "MAExp@tv-basicstudies",
+                                  "version": 60,
+                                  "inputs": {
+                                    "length": 10,
+                                  }
+                              }]}} />
+                          <br />
                         </div>
-                        }
+                            */}
                       {showchart &&
-                      <div>
+                        <div>
 
-                        <table>
-                          <thead>
-                            <tr className="background-grey">
-                              <td className="background-grey">Ticker</td>
-                              <td className="background-grey">Name</td>
-                              <td className="background-grey">
-                                {this.state.filterSector !== "" ? <Link href="#" variant="body2" onClick={this.onClickFilterSector("")}>Sector</Link> : "Sector"}</td>
-                              <td className="background-grey" >
-                                {this.state.filterIndustry !== "" ? <Link href="#" variant="body2" onClick={this.onClickFilterIndustry("")}>Industry</Link> : "Industry"}
-                              </td>
-                              <td className="background-grey" >Last</td>
-                              <td className="background-grey" >Change</td>
-                              <td className="background-grey" >Volume</td>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {stocks.map((stock) => {
-                              return ((this.state.filterSector == "" || stock.Sector == this.state.filterSector) && (this.state.filterIndustry == "" || stock.Industry == this.state.filterIndustry) ?
-                                <tr>
-                                  <td><Link href="#" variant="body2" onClick={this.setSimbol(stock.Symbol)}>{stock.Symbol}</Link></td>
-                                  <td>{stock.Name}{this.state.filterSector}</td>
-                                  <td><Link href="#" variant="body2" onClick={this.onClickFilterSector(stock.Sector)}>{stock.Sector}</Link></td>
-                                  <td><Link href="#" variant="body2" onClick={this.onClickFilterIndustry(stock.Industry)}>{stock.Industry}</Link></td>
-                                  <td>{stock.Last}</td>
-                                  <td style={{ color: stock.Change.indexOf("-") != 0 ? 'green' : 'red' }}>{stock.Change}%</td>
-                                  <td>{stock.Volume}</td>
-                                </tr> : ""
+                          <table>
+                            <thead>
+                              <tr className="background-grey">
+                                <td className="background-grey"><Link href="#" variant="body2" onClick={this.onClickOrderTicker()}>Ticker</Link></td>
+                                <td className="background-grey">Name</td>
+                                <td className="background-grey">
+                                  {this.state.filterSector !== "" ? <Link href="#" variant="body2" onClick={this.onClickFilterSector("")}>Sector</Link> : "Sector"}</td>
+                                <td className="background-grey" >
+                                  {this.state.filterIndustry !== "" ? <Link href="#" variant="body2" onClick={this.onClickFilterIndustry("")}>Industry</Link> : "Industry"}
+                                </td>
+                                <td className="background-grey" >Last</td>
+                                <td className="background-grey" ><Link href="#" variant="body2" onClick={this.onClickOrderChange()}>Change</Link></td>
+                                <td className="background-grey" ><Link href="#" variant="body2" onClick={this.onClickOrderVolume()}>Volume</Link></td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {stocks.map((stock) => {
+                                return ((this.state.filterSector == "" || stock.Sector == this.state.filterSector) && (this.state.filterIndustry == "" || stock.Industry == this.state.filterIndustry) ?
+                                  <tr id={"R"+stock.Symbol}>
+                                    <td><Link ref={this.myRef} id={stock.Symbol} style={{cursor:"pointer"}} variant="body2" onClick={this.setSimbol(stock.Symbol)}>{stock.Symbol}</Link></td>
+                                    <td>{stock.Name}{this.state.filterSector}</td>
+                                    <td><Link href="#" variant="body2" onClick={this.onClickFilterSector(stock.Sector)}>{stock.Sector}</Link></td>
+                                    <td><Link href="#" variant="body2" onClick={this.onClickFilterIndustry(stock.Industry)}>{stock.Industry}</Link></td>
+                                    <td>{stock.Last}</td>
+                                    <td style={{ color: stock.Change.indexOf("-") != 0 ? 'green' : 'red' }}>{stock.Change}%</td>
+                                    <td>{parseInt(stock.Volume).toLocaleString()}</td>
+                                  </tr> : ""
+                                )
+                              }
                               )
-                            }
-                            )
-                            }
-                          </tbody>
-                        </table>
+                              }
+                            </tbody>
+                          </table>
+                          <TradingViewDialog open={this.state.symbol!=""} selectedValue={this.state.symbol} onClose={this.TradingViewDialogClose} onMove={this.onMove} onMoveBack={this.onMoveBack}></TradingViewDialog>
                         </div>
+                        
                       }
                       {!showchart && <div>No tickers found today in this screener</div>}
                     </center>
